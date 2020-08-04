@@ -270,7 +270,7 @@ server <- function(input, output) {
                     mode = "lines",
                     fill = 'tonexty',
                     text = ~paste0("</br>", Group,": ", round(Value,3),
-                                   "</br>Students: ", round(Students,3),
+                                   "</br>Students: ", round(`New Students`,3),
                                    "</br>", Group," (Percentage of Students): ", 
                                    "</br>", scales::percent(Value/`New Students`, accuracy = 0.1)), 
                     hoverinfo = "text") %>% 
