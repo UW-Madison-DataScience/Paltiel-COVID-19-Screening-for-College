@@ -107,10 +107,13 @@ df <-
          Symptoms = Symptoms,
          `False Positive` = FP,
          Total = TP+Symptoms+FP) %>% 
-  mutate(New = lag(Asympt,1,NA)*beta*lag(Susceptible,1,NA)/(lag(Susceptible,1,NA)+lag(Exposed,1,NA)+lag(Asympt,1,NA)),
-         New = ifelse(is.na(New),0,New),
-         Cumulative = cumsum(New),
-         Per.Cumulative = Cumulative/initial.susceptible)
+  mutate(`New Infections` = lag(Asympt,1,NA)*beta*lag(Susceptible,1,NA)/(lag(Susceptible,1,NA)+lag(Exposed,1,NA)+lag(Asympt,1,NA)),
+         `New Infections` = ifelse(Cycle>1,
+                      `New Infections`+pmin(`Superspreader Event`*new.infections.per.shock,lag(Susceptible,1,NA)),
+                      `New Infections`),
+         `New Infections` = ifelse(is.na(`New Infections`),0,`New Infections`),
+         `Cumulative Infections` = cumsum(`New Infections`),
+         `%Cumulative Infections` = `Cumulative Infections`/initial.susceptible)
 
 ```
 
@@ -122,7 +125,7 @@ sum.stat <-
             `Average Isolation Unit Census` = mean(`Total`, na.rm = TRUE),
             `Average %TP in Isolation` = 1-(mean(`False Positive`, na.rm = TRUE)/mean(`Total`, na.rm = TRUE)),
             `Total testing cost` = `Total Persons Tested in 80 days`*test.cost+`Total Confirmatory Tests Performed`*confirmatory.test.cost,
-            `Total Infections` = last(Cumulative))
+            `Total Infections` = last(`Cumulative Infections`))
 
 ```
 
