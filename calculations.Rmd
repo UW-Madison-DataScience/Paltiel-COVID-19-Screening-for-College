@@ -31,7 +31,10 @@ confirmatory.test.cost <- 100
 ```
 
 ```{r}
-num.exogenous.shocks <- as.numeric(exogenous.shocks)
+num.exogenous.shocks <- case_when(
+  exogenous.shocks == "Yes" ~ 1,
+  exogenous.shocks == "No" ~ 0
+)
 cycles.per.day <- 3
 frequency.exogenous.shocks <- cycles.per.day*frequency.exogenous.shocks.per.day
 cycles.per.test <- case_when(
