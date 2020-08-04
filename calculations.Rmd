@@ -14,7 +14,7 @@ initial.susceptible <- 1500
 initial.infected <- 10
 
 r0 <- 1.5
-exogenous.shocks <- TRUE
+exogenous.shocks <- "Yes"
 frequency.exogenous.shocks.per.day <- 7
 new.infections.per.shock <- 10
 days.incubation <- 3
