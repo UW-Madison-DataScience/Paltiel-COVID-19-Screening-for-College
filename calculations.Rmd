@@ -132,3 +132,20 @@ sum.stat <-
 
 ```
 
+```{r}
+df %>% 
+  select(Day, `True Positive`, Symptoms,`False Positive`) %>% 
+  pivot_longer(`True Positive`:`False Positive`, names_to = "Group") %>% 
+  group_by(Day) %>% 
+  arrange(Group) %>% 
+  mutate(Students = cumsum(value)) %>% 
+  plot_ly(type = 'scatter', 
+          x = ~Day, 
+          y = ~Students, 
+          color = ~Group, 
+          colors = "RdYlBu",
+          mode = 'lines', 
+          fill = 'tonexty')
+  
+```
+
