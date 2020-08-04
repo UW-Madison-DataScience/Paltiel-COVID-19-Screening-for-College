@@ -275,7 +275,14 @@ server <- function(input, output) {
                                    "</br>", scales::percent(Value/`New Students`, accuracy = 0.1)), 
                     hoverinfo = "text") %>% 
             layout(title = "Isolation Unit Occupancy") %>% 
-            layout(yaxis = list(title = "Number of Students"))
+            layout(yaxis = list(title = "Number of Students")) %>% 
+            layout(autosize = TRUE, 
+                   margin = list(l = 75,
+                                 r = 75,
+                                 b = 75,
+                                 t = 75,
+                                 pad = 10)) %>%
+            config(displaylogo = FALSE)
     })
     
     # ## Expected outputs
