@@ -148,6 +148,8 @@ sum.stat <-
 df %>% 
   select(Day, `True Positive`, Symptoms,`False Positive`) %>% 
   pivot_longer(`True Positive`:`False Positive`, names_to = "Group", values_to = "Value") %>% 
+  mutate(Group = as.factor(Group),
+         Group = forcats::fct_relevel(Group, levels = c("True Positive", "Symptoms", "False Positive"))) %>% 
   group_by(Day) %>% 
   arrange(Group) %>% 
   mutate(`New Students` = sum(Value),
@@ -164,7 +166,9 @@ df %>%
                         "</br>Students: ", round(Students,3),
                         "</br>", Group," (Percentage of Students): ", 
                         "</br>", scales::percent(Value/`New Students`, accuracy = 0.1)), 
-          hoverinfo = "text")
+          hoverinfo = "text") %>% 
+  layout(title = "Isolation Unit Occupancy") %>% 
+  layout(yaxis = list(title = "Number of Students"))
   
 ```
 
