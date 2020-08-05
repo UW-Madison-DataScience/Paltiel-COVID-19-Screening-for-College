@@ -27,9 +27,9 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     id = "sidebar",
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Source code", icon = icon("file-code-o"), 
+    menuItem("Source Code", icon = icon("file-code-o"), 
              href = "https://github.com/aravamu2/Paltiel-COVID-19-Screening-for-College/blob/master/Screening/app.R/"),
-    menuItem(" Orignal Spreasheet", icon = icon("google-drive"), 
+    menuItem("Original Spreasdheet", icon = icon("google-drive"), 
              href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071"),
     menuItem("References", tabName = "references", icon = icon("book"))
   )
@@ -91,7 +91,7 @@ body <- dashboardBody(
                  collapsible = TRUE, collapsed = FALSE,
                  numericInput("R0", "R0", value = 2.5, min = 0, step = 0.5),
                  radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
-                 numericInput("shocks_frequency", "Frequency of exogenous shocks (every x days)", value = 7, min = 0),
+                 numericInput("frequency_exogenous_shocks", "Frequency of exogenous shocks (every x days)", value = 7, min = 0),
                  numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10, min = 0),
              ),
       ),
@@ -109,7 +109,7 @@ body <- dashboardBody(
              ## Testing
              box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
                  collapsible = TRUE, collapsed = FALSE,
-                 selectizeInput("freqency_of_screening", "Frequency of screening",
+                 selectizeInput("frequency_of_screening", "Frequency of screening",
                                 choices = c("Symptoms Only",
                                             "Every 4 weeks",
                                             "Every 3 weeks",
@@ -125,7 +125,7 @@ body <- dashboardBody(
                               min = 0, max = 1, step = 0.02),
                  numericInput("test_cost", "Test cost ($)", value = 25,
                               min = 0, step = 5),
-                 numericInput("isolation_return_time", "Time to return FPs from Isolation (days)", value = 1,
+                 numericInput("time_to_return_fps", "Time to return FPs from Isolation (days)", value = 1,
                               min = 0),
                  numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100,
                               min = 0, step = 5),
@@ -181,23 +181,23 @@ server <- function(input, output) {
       input$exogenous_shocks == "No" ~ 0
     )
     cycles.per.day <- 3
-    frequency.exogenous.shocks <- cycles.per.day*input$shocks_frequency
+    frequency.exogenous.shocks <- cycles.per.day*input$frequency_exogenous_shocks
     cycles.per.test <- case_when(
-      input$freqency_of_screening == "Daily" ~ 1*cycles.per.day,
-      input$freqency_of_screening == "Every 2 days" ~ 2*cycles.per.day,
-      input$freqency_of_screening == "Every 3 days" ~ 3*cycles.per.day,
-      input$freqency_of_screening == "Weekly" ~ 7*cycles.per.day,
-      input$freqency_of_screening == "Every 2 weeks" ~ 14*cycles.per.day,
-      input$freqency_of_screening == "Every 3 weeks" ~ 21*cycles.per.day,
-      input$freqency_of_screening == "Every 4 weeks" ~ 28*cycles.per.day,
-      input$freqency_of_screening == "Symptoms Only" ~ 99999999999
+      input$frequency_of_screening == "Daily" ~ 1*cycles.per.day,
+      input$frequency_of_screening == "Every 2 days" ~ 2*cycles.per.day,
+      input$frequency_of_screening == "Every 3 days" ~ 3*cycles.per.day,
+      input$frequency_of_screening == "Weekly" ~ 7*cycles.per.day,
+      input$frequency_of_screening == "Every 2 weeks" ~ 14*cycles.per.day,
+      input$frequency_of_screening == "Every 3 weeks" ~ 21*cycles.per.day,
+      input$frequency_of_screening == "Every 4 weeks" ~ 28*cycles.per.day,
+      input$frequency_of_screening == "Symptoms Only" ~ 99999999999
     )
     rho <- 1/(input$time_to_recovery*cycles.per.day)
     sigma <- rho*(input$pct_advancing_to_symptoms/(1-input$pct_advancing_to_symptoms))
     beta <- input$R0*(rho+sigma)
     delta <- (input$symptom_case_fatality_ratio/(1-input$symptom_case_fatality_ratio))*rho
     theta <- 1/(input$days_to_incubation*cycles.per.day)
-    mu <- 1/(cycles.per.day*input$isolation_return_time)
+    mu <- 1/(cycles.per.day*input$time_to_return_fps)
     
     n.cycle <- 240
     
@@ -428,7 +428,7 @@ shinyApp(ui, server)
 #                   box(title = "Testing", width = NULL, #solidHeader = TRUE, status = input_element_color,
 #                       background = "light-blue", 
 #                       collapsible = TRUE, collapsed = FALSE,
-#                       selectizeInput("freqency_of_screening", "Frequency of screening",
+#                       selectizeInput("frequency_of_screening", "Frequency of screening",
 #                                      choices = c("Symptoms Only", 
 #                                                  "Every 4 weeks",
 #                                                  "Every 3 weeks",
@@ -482,7 +482,7 @@ shinyApp(ui, server)
 #                   ## Testing
 #                   box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
 #                       collapsible = TRUE, collapsed = FALSE,
-#                       selectizeInput("freqency_of_screening", "Frequency of screening",
+#                       selectizeInput("frequency_of_screening", "Frequency of screening",
 #                                      choices = c("Symptoms Only", 
 #                                                  "Every 4 weeks",
 #                                                  "Every 3 weeks",
