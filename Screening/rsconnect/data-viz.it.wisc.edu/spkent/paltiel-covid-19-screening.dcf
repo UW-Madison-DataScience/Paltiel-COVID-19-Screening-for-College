@@ -1,0 +1,12 @@
+name: paltiel-covid-19-screening
+title: Paltiel-Covid-19-Screening
+username: spkent
+account: spkent
+server: data-viz.it.wisc.edu
+hostUrl: https://data-viz.it.wisc.edu/__api__
+appId: 73
+bundleId: 289
+url: https://data-viz.it.wisc.edu/content/73/
+when: 1596599297.12709
+asMultiple: FALSE
+asStatic: FALSE

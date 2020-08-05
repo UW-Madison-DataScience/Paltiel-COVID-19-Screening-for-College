@@ -5,15 +5,15 @@ library(tidyverse)
 library(plotly)
 
 #' TODO: list
-#' - Numerical ranges for input parameters
 #' - Have exogenous shock variables included only when exogenous shock = "Yes"
 #' - Format some of the input variables (see here: https://stackoverflow.com/questions/51791983/how-to-format-r-shiny-numericinput)
-#' 
+#' - Make number of days an input parameter (85 for WI)
 
 # fix the styles, will over-ride later
 # see https://rstudio.github.io/shinydashboard/appearance.html#statuses-and-colors
 input_element_color <- "primary" 
-statistics_element_color <- "olive" 
+highlight_color <- "olive" 
+regular_color <- "navy"
 # actual colors used:
 # uw madison red #da004c
 # darker red #8b0037
@@ -23,13 +23,15 @@ header <- dashboardHeader(
 )
 
 sidebar <- dashboardSidebar(
+    tags$style("@import url(https://use.fontawesome.com/releases/v5.14.0/css/all.css);"),
     sidebarMenu(
         id = "sidebar",
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
         menuItem("Source code", icon = icon("file-code-o"), 
-                 href = "https://github.com/rstudio/shinydashboard/"),
-        menuItem("Orignal Spreasheet", icon = icon("file-code-o"), 
-                 href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071")
+                 href = "https://github.com/aravamu2/Paltiel-COVID-19-Screening-for-College/blob/master/Screening/app.R/"),
+        menuItem(" Orignal Spreasheet", icon = icon("google-drive"), 
+                 href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071"),
+        menuItem("References", tabName = "references", icon = icon("book"))
     )
 )
 
@@ -41,98 +43,131 @@ body <- dashboardBody(
         "
         .box.box-solid.box-primary>.box-header {
             color:#fff;
-            background:#727272
+            background:#646569
         }
 
         .box.box-solid.box-primary{
-            border-bottom-color:#727272;
-            border-left-color:#727272;
-            border-right-color:#727272;
-            border-top-color:#727272;
+            border-bottom-color:#646569;
+            border-left-color:#646569;
+            border-right-color:#646569;
+            border-top-color:#646569;
         }
         
         .bg-olive {
-            background-color: #a1002f!important;
+            background-color: #8F0000!important;
         }
         
-        .skin-blue .main-header .navbar { background-color: #da004c!important; }
-
-        .skin-blue .main-header .logo { background-color: #a1002f; }
-        .skin-blue .main-header .logo:hover { background-color: #90002A; }
-        .skin-blue .sidebar-menu>li.active>a, .skin-blue .sidebar-menu>li:hover>a {
-            border-left-color: #90002A; 
+        .bg-navy {
+            background-color: #8F0000!important;
         }
-        .skin-blue .main-header .navbar .sidebar-toggle:hover{ background-color:#a1002f; }
-        .skin-blue .main-header .navbar .dropdown-menu li a:hover{ background:#90002A; }
+        
+        
+        .skin-blue .main-header .navbar { background-color: #c5050c!important; }
+
+        .skin-blue .main-header .logo { background-color: #9b0000; }
+        .skin-blue .main-header .logo:hover { background-color: #8F0000; }
+        .skin-blue .sidebar-menu>li.active>a, .skin-blue .sidebar-menu>li:hover>a {
+            border-left-color: #8F0000; 
+        }
+        .skin-blue .main-header .navbar .sidebar-toggle:hover{ background-color:#9b0000; }
+        .skin-blue .main-header .navbar .dropdown-menu li a:hover{ background:#8F0000; }
         "
     )),
-
-    
-    ## INPUTS ------------------------------------------------------------------
-    column(width = 2,
-           ## Population
-           box(title = "Population", width = NULL, solidHeader = TRUE, status = input_element_color,
-               collapsible = TRUE, collapsed = FALSE,
-               numericInput("initial_susceptible", "Initial susceptible", value = 1500),
-               numericInput("initial_infected", "Initial infected", value = 10)
-           ),
-           ## Epidemiology
-           box(title = "Epidemiology", width = NULL, solidHeader = TRUE, status = input_element_color,
-               collapsible = TRUE, collapsed = FALSE,
-               numericInput("R0", "R0", value = 1.5),
-               radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
-               numericInput("shocks_frequency", "Frequency of exogenous shocks (every x days)", value = 7),
-               numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10),
-           ),
-    ),
-    column(width = 2,
-           ## Clinical history
-           box(title = "Clinical history", width = NULL, solidHeader = TRUE, status = input_element_color,
-               collapsible = TRUE, collapsed = TRUE,
-               numericInput("days_to_incubation", "Days to Incubation", value = 3),
-               numericInput("time_to_recovery", "Time to recovery (days)", value = 14),
-               numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 0.3),
-               numericInput("symptom_case_fatality_ratio", "Symptom Case Fatality Ratio", value = 0.0005),
-           ),
-           ## Testing
-           box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
-               collapsible = TRUE, collapsed = FALSE,
-               selectizeInput("freqency_of_screening", "Frequency of screening",
-                              choices = c("Symptoms Only",
-                                          "Every 4 weeks",
-                                          "Every 3 weeks",
-                                          "Every 2 weeks",
-                                          "Weekly",
-                                          "Every 3 days",
-                                          "Every 2 days",
-                                          "Daily"),
-                              selected = "Weekly"),
-               numericInput("test_sensitivity", "Test sensitivity", value = 0.8),
-               numericInput("test_specificity", "Test specificity", value = 0.98),
-               numericInput("test_cost", "Test cost ($)", value = 25),
-               numericInput("isolation_return_time", "Time to return FPs from Isolation (days)", value = 3),
-               numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100),
-           ),
-    ),
-    
-    ## OUTPUT: plot and metrics
-    column(width = 8, 
-           fluidRow(
-               valueBoxOutput("testing_cost_box", width = 4), 
-               valueBoxOutput("number_tested_box", width = 4), 
-               valueBoxOutput("number_confirmatory_tests_box", width = 4), 
-           ),
-           fluidRow(
-               valueBoxOutput("infections_box", width = 4), 
-               valueBoxOutput("average_iu_census_box", width = 4), 
-               # valueBoxOutput("average_pct_isolated_box", width = 4), 
-               infoBoxOutput("average_pct_isolated_ibox", width = 4),
-           ),
-           # fluidRow(plotOutput("plot1")),
-           plotlyOutput("plot1")
-           
-           
+    tabItems(
+        tabItem(
+            # MAIN DASHBOARD ---------------------------------------------------
+            tabName = "dashboard",
+            ## INPUTS --------
+            column(width = 2,
+                   ## Population
+                   box(title = "Population", width = NULL, solidHeader = TRUE, status = input_element_color,
+                       collapsible = TRUE, collapsed = FALSE,
+                       numericInput("initial_susceptible", "Initial susceptible", value = 4990,
+                                    min = 0),
+                       numericInput("initial_infected", "Initial infected", value = 10,
+                                    min = 0)
+                   ),
+                   ## Epidemiology
+                   box(title = "Epidemiology", width = NULL, solidHeader = TRUE, status = input_element_color,
+                       collapsible = TRUE, collapsed = FALSE,
+                       numericInput("R0", "R0", value = 2.5, min = 0, step = 0.5),
+                       radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
+                       numericInput("shocks_frequency", "Frequency of exogenous shocks (every x days)", value = 7, min = 0),
+                       numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10, min = 0),
+                   ),
+            ),
+            column(width = 2,
+                   ## Clinical history
+                   box(title = "Clinical history", width = NULL, solidHeader = TRUE, status = input_element_color,
+                       collapsible = TRUE, collapsed = TRUE,
+                       numericInput("days_to_incubation", "Days to Incubation", value = 3, min = 0),
+                       numericInput("time_to_recovery", "Time to recovery (days)", value = 14, min = 0),
+                       numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 0.3,
+                                    min = 0, max = 0.99999, step = 0.05),
+                       numericInput("symptom_case_fatality_ratio", "Symptom case fatality risk", value = 0.0005,
+                                    min = 0, step = 0.0001),
+                   ),
+                   ## Testing
+                   box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
+                       collapsible = TRUE, collapsed = FALSE,
+                       selectizeInput("freqency_of_screening", "Frequency of screening",
+                                      choices = c("Symptoms Only",
+                                                  "Every 4 weeks",
+                                                  "Every 3 weeks",
+                                                  "Every 2 weeks",
+                                                  "Weekly",
+                                                  "Every 3 days",
+                                                  "Every 2 days",
+                                                  "Daily"),
+                                      selected = "Weekly"),
+                       numericInput("test_sensitivity", "Test sensitivity", value = 0.8,
+                                    min = 0, max = 1, step = 0.02),
+                       numericInput("test_specificity", "Test specificity", value = 0.98,
+                                    min = 0, max = 1, step = 0.02),
+                       numericInput("test_cost", "Test cost ($)", value = 25,
+                                    min = 0, step = 5),
+                       numericInput("isolation_return_time", "Time to return FPs from Isolation (days)", value = 1,
+                                    min = 0),
+                       numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100,
+                                    min = 0, step = 5),
+                   ),
+            ),
+            ## OUTPUT: plot and metrics --------
+            column(width = 8, 
+                   fluidRow(
+                       valueBoxOutput("testing_cost_box", width = 4),
+                       valueBoxOutput("number_tested_box", width = 4),
+                       valueBoxOutput("average_iu_census_box", width = 4),
+                   ),
+                   fluidRow(
+                       valueBoxOutput("infections_box", width = 4),
+                       valueBoxOutput("number_confirmatory_tests_box", width = 4),
+                       valueBoxOutput("average_pct_isolated_box", width = 4),
+                   ),
+                   plotlyOutput("plot1")
+            )
+        ),
+        ## References ----------------------------------------------------------
+        tabItem(
+            tabName = "references",
+            h2("Methodology"),
+            p("Methodology for this application comes from the JAMA Network Open 
+              article by ", 
+              a("Paltiel, Zheng, and Walensky (2020).",
+                href = "https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2768923"),
+              " Those authors also built a spreadsheet detailing their compartmental model calculations,
+              which can be found ",
+              a("online.", 
+                href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071"),
+              " Our implementation here currently mimics this spreadsheet, but may soon expand on it."),
+            h2("References"),
+            p("Paltiel AD, Zheng A, Walensky RP. Assessment of SARS-CoV-2 Screening 
+              Strategies to Permit the Safe Reopening of College Campuses in the 
+              United States. JAMA Netw Open. 2020;3(7):e2016818. 
+              doi:10.1001/jamanetworkopen.2020.16818"),
+        )
     )
+    
     
 )
 
@@ -152,12 +187,12 @@ server <- function(input, output) {
         frequency.exogenous.shocks <- cycles.per.day*input$shocks_frequency
         cycles.per.test <- case_when(
             input$freqency_of_screening == "Daily" ~ 1*cycles.per.day,
-            input$freqency_of_screening == "Every 2 Days" ~ 2*cycles.per.day,
-            input$freqency_of_screening == "Every 3 Days" ~ 3*cycles.per.day,
+            input$freqency_of_screening == "Every 2 days" ~ 2*cycles.per.day,
+            input$freqency_of_screening == "Every 3 days" ~ 3*cycles.per.day,
             input$freqency_of_screening == "Weekly" ~ 7*cycles.per.day,
-            input$freqency_of_screening == "Every 2 Weeks" ~ 14*cycles.per.day,
-            input$freqency_of_screening == "Every 3 Weeks" ~ 21*cycles.per.day,
-            input$freqency_of_screening == "Every 4 Weeks" ~ 28*cycles.per.day,
+            input$freqency_of_screening == "Every 2 weeks" ~ 14*cycles.per.day,
+            input$freqency_of_screening == "Every 3 weeks" ~ 21*cycles.per.day,
+            input$freqency_of_screening == "Every 4 weeks" ~ 28*cycles.per.day,
             input$freqency_of_screening == "Symptoms Only" ~ 99999999999
         )
         rho <- 1/(input$time_to_recovery*cycles.per.day)
@@ -256,7 +291,11 @@ server <- function(input, output) {
             select(Day, `True Positive`, Symptoms,`False Positive`) %>% 
             pivot_longer(`True Positive`:`False Positive`, names_to = "Group", values_to = "Value") %>% 
             mutate(Group = as.factor(Group),
-                   Group = forcats::fct_relevel(Group, levels = c("True Positive", "Symptoms", "False Positive"))) %>% 
+                   Group = forcats::fct_relevel(Group, levels = c("True Positive", "Symptoms", "False Positive")),
+                   Group = forcats::fct_recode(Group,
+                                               "Asymptomatic (TP)" = "True Positive",
+                                               "Symptomatic" = "Symptoms",
+                                               "Uninfected (FP)" = "False Positive")) %>% 
             group_by(Day) %>% 
             arrange(Group) %>% 
             mutate(`New Students` = sum(Value),
@@ -264,17 +303,20 @@ server <- function(input, output) {
             plot_ly(x = ~Day, 
                     y = ~Students, 
                     color = ~Group, 
-                    colors = "RdYlBu",
+                    colors = "YlOrRd",
                     alpha = 0.7,
                     type = "scatter",
                     mode = "lines",
                     fill = 'tonexty',
-                    text = ~paste0("</br>", Group,": ", round(Value,3),
-                                   "</br>Students: ", round(`New Students`,3),
-                                   "</br>", Group," (Percentage of Students): ", 
-                                   "</br>", scales::percent(Value/`New Students`, accuracy = 0.1)), 
+                    text = ~paste0("</br>", Group,": ", round(Value, 1), " students", 
+                                   " (", scales::percent(Value/`New Students`, accuracy = 0.1), ")",
+                                   "</br>Total students in isolation: ", round(`New Students`, 1),
+                                   "</br>Day: ", floor(Day)
+                                   # "</br>", Group," (Percentage of Students): ", 
+                                   # "</br>", scales::percent(Value/`New Students`, accuracy = 0.1)
+                    ), 
                     hoverinfo = "text") %>% 
-            layout(title = "Isolation Unit Occupancy") %>% 
+            layout(title = "Composition of Isolation Pool") %>% 
             layout(yaxis = list(title = "Number of Students")) %>% 
             layout(autosize = TRUE, 
                    margin = list(l = 75,
@@ -297,44 +339,46 @@ server <- function(input, output) {
     output$number_tested_box <- renderValueBox({
         valueBox(scales::comma(sum.stat()$number_tested), "Total Tests",
                  icon = icon("vial"),
-                 color = statistics_element_color)
+                 color = regular_color)
     })
     
     output$number_confirmatory_tests_box <- renderValueBox({
         valueBox(scales::comma(sum.stat()$number_confirmatory_tests), "Confirmatory Tests",
                  icon = icon("vials"), 
-                 color = statistics_element_color)
+                 color = regular_color)
     })
     
     output$average_iu_census_box <- renderValueBox({
-        valueBox(scales::comma(sum.stat()$average_iu_census), "Isolation Unit Census (Avg.)",
-                 color = statistics_element_color)
+        valueBox(scales::comma(sum.stat()$average_iu_census), "Isolation Pool Size (Avg.)",
+                 icon = icon("users"),
+                 color = regular_color)
     })
     
     output$average_pct_isolated_box <- renderValueBox({
-        valueBox(scales::percent(sum.stat()$average_pct_isolated), "Percentage in Isolation (Avg.)",
-                 color = statistics_element_color)
+        valueBox(scales::percent(sum.stat()$average_pct_isolated), "of Isolation Pool Infected (Avg.)",
+                 icon = icon("notes-medical"),
+                 color = regular_color)
     })
     
     output$testing_cost_box <- renderValueBox({
         valueBox(scales::dollar(sum.stat()$testing_cost), "Cost of Testing",
                  # icon = icon("money-bill-wave"),
                  icon = icon("dollar-sign"),
-                 color = statistics_element_color)
+                 color = highlight_color)
     })
     
     output$infections_box <- renderValueBox({
         valueBox(scales::comma(sum.stat()$infections), "Total Infections",
                  icon = icon("viruses"),
-                 color = statistics_element_color)
+                 color = highlight_color)
     })
     
     
-    output$average_pct_isolated_ibox <- renderInfoBox({
-        infoBox(NULL, scales::percent(sum.stat()$average_pct_isolated),
-                subtitle = "Percentage in Isolation (Avg.)",
-                color = statistics_element_color)
-    })
+    # output$average_pct_isolated_ibox <- renderInfoBox({
+    #     infoBox(NULL, scales::percent(sum.stat()$average_pct_isolated),
+    #             subtitle = "TP in Isolation (Avg.)",
+    #             color = regular_color)
+    # })
     # output$approvalBox <- renderInfoBox({
     #     infoBox(
     #         "Approval", "80%", icon = icon("thumbs-up", lib = "glyphicon"),
