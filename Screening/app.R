@@ -82,29 +82,29 @@ body <- dashboardBody(
              box(title = "Population", width = NULL, solidHeader = TRUE, status = input_element_color,
                  collapsible = TRUE, collapsed = FALSE,
                  numericInput("initial_susceptible", "Initial susceptible", value = 4990,
-                              min = 0),
+                              min = 1000),
                  numericInput("initial_infected", "Initial infected", value = 10,
-                              min = 0)
+                              max = 500)
              ),
              ## Epidemiology
              box(title = "Epidemiology", width = NULL, solidHeader = TRUE, status = input_element_color,
                  collapsible = TRUE, collapsed = FALSE,
-                 numericInput("R0", "R0", value = 2.5, min = 0, step = 0.5),
+                 numericInput("R0", "R0", value = 2.5, min = 0.1, max = 5, step = 0.5),
                  radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
                  numericInput("frequency_exogenous_shocks", "Frequency of exogenous shocks (every x days)", value = 7, min = 0),
-                 numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10, min = 0),
+                 numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10, min = 0, max = 200),
              ),
       ),
       column(width = 2,
              ## Clinical history
              box(title = "Clinical history", width = NULL, solidHeader = TRUE, status = input_element_color,
                  collapsible = TRUE, collapsed = TRUE,
-                 numericInput("days_to_incubation", "Days to Incubation", value = 3, min = 0),
-                 numericInput("time_to_recovery", "Time to recovery (days)", value = 14, min = 0),
-                 numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 0.3,
-                              min = 0, max = 0.99999, step = 0.05),
+                 numericInput("days_to_incubation", "Days to Incubation", value = 3, min = 1),
+                 numericInput("time_to_recovery", "Time to recovery (days)", value = 14, min = 1),
+                 numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 30,
+                              min = 5, max = 95, step = 1),
                  numericInput("symptom_case_fatality_ratio", "Symptom case fatality risk", value = 0.0005,
-                              min = 0, step = 0.0001),
+                              min = 0, max = 0.01, step = 0.0001),
              ),
              ## Testing
              box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
@@ -120,15 +120,15 @@ body <- dashboardBody(
                                             "Daily"),
                                 selected = "Weekly"),
                  numericInput("test_sensitivity", "Test sensitivity", value = 0.8,
-                              min = 0, max = 1, step = 0.02),
+                              min = 0.5, max = 1, step = 0.01),
                  numericInput("test_specificity", "Test specificity", value = 0.98,
-                              min = 0, max = 1, step = 0.02),
+                              min = 0.7, max = 1, step = 0.01),
                  numericInput("test_cost", "Test cost ($)", value = 25,
-                              min = 0, step = 5),
+                              min = 0, max = 1000, step = 5),
                  numericInput("time_to_return_fps", "Time to return FPs from Isolation (days)", value = 1,
                               min = 0),
                  numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100,
-                              min = 0, step = 5),
+                              min = 0, max = 1000, step = 5),
              ),
       ),
       ## OUTPUT: plot and metrics --------
@@ -154,11 +154,76 @@ body <- dashboardBody(
         article by ", 
         a("Paltiel, Zheng, and Walensky (2020).",
           href = "https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2768923"),
-        " Those authors also built a spreadsheet detailing their compartmental model calculations,
+        " The authors also built a spreadsheet detailing their compartmental model calculations,
         which can be found ",
         a("online.", 
           href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071"),
-        " Our implementation here currently mimics this spreadsheet, but may soon expand on it."),
+        " Our implementation currently reproduced this spreadsheet and may soon expand on it."),
+      h2("Glossary"),
+      p(strong("Sensitivity:"),"The ability of a test, case definition, or 
+        surveillance system to identify true cases; the proportion of people 
+        with a health condition (or the proportion of outbreaks) that are 
+        identified by a screening test or case definition (or surveillance 
+        system)."),
+      p(strong("Specificity:"),"The ability or a test, case definition, or 
+        surveillance system to exclude persons without the health condition of 
+        interest; the proportion of persons without a health condition that are 
+        correctly identified as such by a screening test, case definition, or 
+        surveillance system."),
+      p(strong("Test cost:"),"The cost of a test to identify occurrence at the 
+        individual level even if there is no reason to suspect infection - e.g., 
+        there is no known exposure. This includes, but is not limited to, 
+        screening of non-symptomatic individuals without known exposure with the 
+        intent of making decisions based on the test results. Screening tests 
+        are intended to identify infected individuals without, or prior to 
+        development of, symptoms who may be contagious so that measures can be 
+        taken to prevent further transmission."),
+      p(strong("Confirmatory test cost:"),"The cost of a test to identify occurrence 
+        at the individual level and is performed when there is a reason to 
+        suspect that an individual may be infected, such as having symptoms or 
+        suspected recent exposure, or to determine resolution of infection."),
+      p(strong("Initial susceptible:"),"Noninfected persons."),
+      p(strong("Initial infected:"),"Infected, asymptomatic persons."),
+      p(strong("R0:"),"The reproduction number is the average number of people that 
+        one person with COVID-19 is likely to infect in a population without any 
+        immunity (from previous infection) or any interventions. R0 is an 
+        estimate of how transmissible a pathogen is in a population. R0 
+        estimates vary across populations and are a function of the duration of 
+        contagiousness, the likelihood of infection per contact between a 
+        susceptible person and an infectious person, and the contact rate."),
+      p(strong("Exogenous shocks:"),"Infections transmitted to students by 
+        university employees or members of the surrounding community or during 
+        superspreader events, such as parties."),
+      p(strong("Days to Incubation:"),"The mean time from exposure to both 
+        infectiousness and screening detectability."),
+      p(strong("Time to recovery (days):"),"The mean time from confirmed 
+        (true-positive) results would remain in the isolation dormitory to 
+        ensure they were not infectious before proceeding to a recovered or 
+        immune state."),
+      p(strong("% asymptomatics advancing to symptoms:"),"The probability that 
+        infection would eventually lead to observable COVID-19-defining symptoms 
+        in the young cohort."),
+      p(strong("Symptom case fatality risk:"),"The COVID-related mortality in 
+        persons of college age."),
+      p(strong("Time to return FPs from Isolation (days):"),"The time from 
+        (false-positive) results would remain isolated, reflecting the 
+        assumption that a highly specific confirmatory test could overturn the 
+        original diagnosis, permitting them to return to the campus 
+        population."),
+      h2("Assumptions"),
+      p(strong("Note:"),"An 80-day time horizon (during an abbreviated 80-day 
+        semester, running from Labor Day through Thanksgiving) is used for the 
+        analysis."),
+      p(strong("Note:"),"A target population of younger than 30 years, nonimmune, 
+        living students in a congregate setting essay at amedium-sized college 
+        setting is assumed for the analysis."),
+      p(strong("Note:"),"A lag of 8 hours after individuals receiving a positive 
+        test result (true or false) is assumed. Those exhibiting COVID-19 
+        symptoms would be moved from the general population to an isolation 
+        dormitory, where their infection would be confirmed and receive 
+        supportive care from which no further transmissions would occur. The lag 
+        reflected both test turnaround delays and the time required to locate 
+        and isolate identified cases."),
       h2("References"),
       p("Paltiel AD, Zheng A, Walensky RP. Assessment of SARS-CoV-2 Screening 
         Strategies to Permit the Safe Reopening of College Campuses in the 
@@ -175,6 +240,90 @@ ui <- dashboardPage(header, sidebar, body)
 server <- function(input, output) {
   ## Reactive elements -------------------------------------------------------
   df <- reactive({
+    
+    if(input$initial_susceptible < 1000) {
+      showNotification("The value for initial susceptible you entered is below the recommended minimum of 1000.", type = "warning")
+    }
+    
+    if(input$initial_infected > 500) {
+      showNotification("The value for initial infected you entered is above the recommended maximum of 500.", type = "warning")
+    }
+    
+    if(input$R0 < 0.1) {
+      showNotification("The value for R0 you entered is below the recommended minimum of 0.1.", type = "warning")
+    }
+    
+    if(input$R0 > 5) {
+      showNotification("The value for R0 you entered is above the recommended maximum of 5.", type = "warning")
+    }
+    
+    if(input$new_infections_per_shock < 0) {
+      showNotification("The value for the number of new infections per shock you entered is below the recommended minimum of 0.", type = "warning")
+    }
+    
+    if(input$new_infections_per_shock > 200) {
+      showNotification("The value the number of new infections per shock you entered is above the recommended maximum of 200.", type = "warning")
+    }
+    
+    if(input$days_to_incubation < 1) {
+      showNotification("The value for days to incubation you entered is above the recommended maximum of 1.", type = "warning")
+    }
+    
+    if(input$time_to_recovery < 1) {
+      showNotification("The value for time to recovery (days) you entered is above the recommended maximum of 1.", type = "warning")
+    }
+    
+    if(input$R0 > 5) {
+      showNotification("The R0 value you entered is above the recommended maximum of 5.", type = "warning")
+    }
+    
+    if(input$pct_advancing_to_symptoms < 5) {
+      showNotification("The value for percent asymptomatic advancing to symptoms you entered is below the recommended minimum of 5.", type = "warning")
+    }
+    
+    if(input$pct_advancing_to_symptoms > 95) {
+      showNotification("The value for percent asymptomatic advancing to symptoms you entered is above the recommended maximum of 95.", type = "warning")
+    }
+    
+    if(input$symptom_case_fatality_ratio < 0) {
+      showNotification("The value for symptom case fatality risk you entered is below the recommended minimum of 0.", type = "warning")
+    }
+    
+    if(input$symptom_case_fatality_ratio > 0.01) {
+      showNotification("The value for symptom case fatality risk you entered is above the recommended maximum of 0.01.", type = "warning")
+    }
+    
+    if(input$test_sensitivity < 0.5) {
+      showNotification("The value for test sensitivity you entered is below the recommended minimum of 0.5.", type = "warning")
+    }
+    
+    if(input$test_sensitivity > 1) {
+      showNotification("The value for test sensitivity you entered is above the recommended maximum of 1.", type = "warning")
+    }
+    
+    if(input$test_specificity < 0.7) {
+      showNotification("The value for test specificity you entered is below the recommended minimum of 0.7.", type = "warning")
+    }
+    
+    if(input$test_specificity > 1) {
+      showNotification("The value for test specificity you entered is above the recommended maximum of 1.", type = "warning")
+    }
+    
+    if(input$test_cost < 0) {
+      showNotification("The value for test cost you entered is below the recommended minimum of 0.", type = "warning")
+    }
+    
+    if(input$test_cost > 1000) {
+      showNotification("The value for test cost you entered is above the recommended maximum of 1000.", type = "warning")
+    }
+    
+    if(input$confirmatory_test_cost < 0) {
+      showNotification("The value for confirmatory test cost you entered is below the recommended minimum of 0.", type = "warning")
+    }
+    
+    if(input$confirmatory_test_cost > 1000) {
+      showNotification("The value for confirmatory test cost you entered is above the recommended maximum of 1000.", type = "warning")
+    }
     
     num.exogenous.shocks <- case_when(
       input$exogenous_shocks == "Yes" ~ 1,
@@ -193,7 +342,7 @@ server <- function(input, output) {
       input$frequency_of_screening == "Symptoms Only" ~ 99999999999
     )
     rho <- 1/(input$time_to_recovery*cycles.per.day)
-    sigma <- rho*(input$pct_advancing_to_symptoms/(1-input$pct_advancing_to_symptoms))
+    sigma <- rho*(input$pct_advancing_to_symptoms/100/(1-input$pct_advancing_to_symptoms/100))
     beta <- input$R0*(rho+sigma)
     delta <- (input$symptom_case_fatality_ratio/(1-input$symptom_case_fatality_ratio))*rho
     theta <- 1/(input$days_to_incubation*cycles.per.day)
@@ -265,6 +414,7 @@ server <- function(input, output) {
   sum.stat <- reactive({
     sum.stat <- 
       df() %>% 
+      slice(2:n()) %>% 
       summarize(`Total Persons Tested in 80 days` = sum(`Persons Tested`, na.rm = TRUE),
                 `Total Confirmatory Tests Performed` = sum(`Total TPs`, na.rm = TRUE) + sum(`Total FPs`, na.rm = TRUE),
                 `Average Isolation Unit Census` = mean(`Total`, na.rm = TRUE),
@@ -281,7 +431,6 @@ server <- function(input, output) {
       testing_cost = sum.stat$`Total testing cost`,
       infections = sum.stat$`Total Infections`
     )
-    
   })
   
   ## OUTPUTS -------------------------------------------------------------------
@@ -303,7 +452,7 @@ server <- function(input, output) {
         plot_ly(x = ~Day, 
                 y = ~Students, 
                 color = ~Group, 
-                colors = "YlOrRd",
+                colors = RColorBrewer::brewer.pal(9,"YlOrRd")[c(3,6,9)],
                 alpha = 0.7,
                 type = "scatter",
                 mode = "lines",

@@ -135,6 +135,7 @@ df <-
 ```{r}
 sum.stat <- 
   df %>% 
+  slice(2:n()) %>% 
   summarize(`Total Persons Tested in 80 days` = sum(`Persons Tested`, na.rm = TRUE),
             `Total Confirmatory Tests Performed` = sum(`Total TPs`, na.rm = TRUE) + sum(`Total FPs`, na.rm = TRUE),
             `Average Isolation Unit Census` = mean(`Total`, na.rm = TRUE),
