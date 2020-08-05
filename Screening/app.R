@@ -288,7 +288,7 @@ server <- function(input, output) {
   output$plot1 <- 
     renderPlotly({
       df() %>% 
-        select(Day, `True Positive`, Symptoms,`False Positive`) %>% 
+        select(Day, `True Positive`, Symptoms, `False Positive`) %>% 
         pivot_longer(`True Positive`:`False Positive`, names_to = "Group", values_to = "Value") %>% 
         mutate(Group = as.factor(Group),
                Group = forcats::fct_relevel(Group, levels = c("True Positive", "Symptoms", "False Positive")),
