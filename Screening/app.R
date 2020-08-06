@@ -150,7 +150,7 @@ body <- dashboardBody(
     tabItem(
       tabName = "references",
       h2("Methodology"),
-      p("Methodology for this application comes from the JAMA Network Open 
+      p("The methodology for this application comes from the JAMA Network Open 
         article by ", 
         a("Paltiel, Zheng, and Walensky (2020).",
           href = "https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2768923"),
@@ -167,7 +167,7 @@ body <- dashboardBody(
         system)."),
       p(strong("Specificity:"),"The ability or a test, case definition, or 
         surveillance system to exclude persons without the health condition of 
-        interest; the proportion of persons without a health condition that are 
+        interest; the proportion of persons without a health condition that is 
         correctly identified as such by a screening test, case definition, or 
         surveillance system."),
       p(strong("Test cost:"),"The cost of a test to identify occurrence at the 
@@ -176,17 +176,17 @@ body <- dashboardBody(
         screening of non-symptomatic individuals without known exposure with the 
         intent of making decisions based on the test results. Screening tests 
         are intended to identify infected individuals without, or prior to 
-        development of, symptoms who may be contagious so that measures can be 
+        the development of, symptoms who may be contagious so that measures can be 
         taken to prevent further transmission."),
       p(strong("Confirmatory test cost:"),"The cost of a test to identify occurrence 
         at the individual level and is performed when there is a reason to 
         suspect that an individual may be infected, such as having symptoms or 
-        suspected recent exposure, or to determine resolution of infection."),
+        suspected recent exposure or to determine the resolution of infection."),
       p(strong("Initial susceptible:"),"Noninfected persons."),
       p(strong("Initial infected:"),"Infected, asymptomatic persons."),
       p(strong("R0:"),"The reproduction number is the average number of people that 
         one person with COVID-19 is likely to infect in a population without any 
-        immunity (from previous infection) or any interventions. R0 is an 
+        immunity (from a previous infection) or any interventions. R0 is an 
         estimate of how transmissible a pathogen is in a population. R0 
         estimates vary across populations and are a function of the duration of 
         contagiousness, the likelihood of infection per contact between a 
@@ -215,7 +215,7 @@ body <- dashboardBody(
         semester, running from Labor Day through Thanksgiving) is used for the 
         analysis."),
       p(strong("Note:"),"A target population of younger than 30 years, nonimmune, 
-        living students in a congregate setting essay at amedium-sized college 
+        living students in a congregate setting essay at a medium-sized college 
         setting is assumed for the analysis."),
       p(strong("Note:"),"A lag of 8 hours after individuals receiving a positive 
         test result (true or false) is assumed. Those exhibiting COVID-19 
@@ -238,92 +238,68 @@ body <- dashboardBody(
 ui <- dashboardPage(header, sidebar, body)
 
 server <- function(input, output) {
+  ## Check that inputs meet restrictions ---------------------------------------
+  observe({
+    # Don't throw an error if the field is left blank momentarily
+    req(input$initial_susceptible,
+        input$initial_infected,
+        input$R0,
+        input$new_infections_per_shock,
+        input$days_to_incubation,
+        input$time_to_recovery,
+        input$pct_advancing_to_symptoms,
+        input$symptom_case_fatality_ratio,
+        input$test_sensitivity,
+        input$test_specificity,
+        input$test_cost,
+        input$confirmatory_test_cost,
+        cancelOutput = TRUE
+    )
+    
+    showWarningIf <- function(condition, message) {
+      if (condition) {
+        showNotification(message, type = "warning")
+      }
+    }
+    
+    showWarningIf(input$initial_susceptible < 1000, "The value for initial susceptible you entered is below the recommended minimum of 1000.")
+    showWarningIf(input$initial_infected > 500, "The value for initial infected you entered is above the recommended maximum of 500.")
+    showWarningIf(input$R0 < 0.1, "The value for R0 you entered is below the recommended minimum of 0.1.")
+    showWarningIf(input$R0 > 5, "The value for R0 you entered is above the recommended maximum of 5.")
+    showWarningIf(input$new_infections_per_shock < 0, "The value for the number of new infections per shock you entered is below the recommended minimum of 0.")
+    showWarningIf(input$new_infections_per_shock > 200, "The value the number of new infections per shock you entered is above the recommended maximum of 200.")
+    showWarningIf(input$days_to_incubation < 1, "The value for days to incubation you entered is above the recommended maximum of 1.")
+    showWarningIf(input$time_to_recovery < 1, "The value for time to recovery (days) you entered is above the recommended maximum of 1.")
+    showWarningIf(input$pct_advancing_to_symptoms < 5, "The value for percent asymptomatic advancing to symptoms you entered is below the recommended minimum of 5.")
+    showWarningIf(input$pct_advancing_to_symptoms > 95, "The value for percent asymptomatic advancing to symptoms you entered is above the recommended maximum of 95.")
+    showWarningIf(input$symptom_case_fatality_ratio < 0, "The value for symptom case fatality risk you entered is below the recommended minimum of 0.")
+    showWarningIf(input$symptom_case_fatality_ratio > 0.01, "The value for symptom case fatality risk you entered is above the recommended maximum of 0.01.")
+    showWarningIf(input$test_sensitivity < 0.5, "The value for test sensitivity you entered is below the recommended minimum of 0.5.")
+    showWarningIf(input$test_sensitivity > 1, "The value for test sensitivity you entered is above the recommended maximum of 1.")
+    showWarningIf(input$test_specificity < 0.7, "The value for test specificity you entered is below the recommended minimum of 0.7.")
+    showWarningIf(input$test_specificity > 1, "The value for test specificity you entered is above the recommended maximum of 1.")
+    showWarningIf(input$test_cost < 0, "The value for test cost you entered is below the recommended minimum of 0.")
+    showWarningIf(input$test_cost > 1000, "The value for test cost you entered is above the recommended maximum of 1000.")
+    showWarningIf(input$confirmatory_test_cost < 0, "The value for confirmatory test cost you entered is below the recommended minimum of 0.")
+    showWarningIf(input$confirmatory_test_cost > 1000, "The value for confirmatory test cost you entered is above the recommended maximum of 1000.")
+  })
+  
   ## Reactive elements -------------------------------------------------------
   df <- reactive({
-    
-    if(input$initial_susceptible < 1000) {
-      showNotification("The value for initial susceptible you entered is below the recommended minimum of 1000.", type = "warning")
-    }
-    
-    if(input$initial_infected > 500) {
-      showNotification("The value for initial infected you entered is above the recommended maximum of 500.", type = "warning")
-    }
-    
-    if(input$R0 < 0.1) {
-      showNotification("The value for R0 you entered is below the recommended minimum of 0.1.", type = "warning")
-    }
-    
-    if(input$R0 > 5) {
-      showNotification("The value for R0 you entered is above the recommended maximum of 5.", type = "warning")
-    }
-    
-    if(input$new_infections_per_shock < 0) {
-      showNotification("The value for the number of new infections per shock you entered is below the recommended minimum of 0.", type = "warning")
-    }
-    
-    if(input$new_infections_per_shock > 200) {
-      showNotification("The value the number of new infections per shock you entered is above the recommended maximum of 200.", type = "warning")
-    }
-    
-    if(input$days_to_incubation < 1) {
-      showNotification("The value for days to incubation you entered is above the recommended maximum of 1.", type = "warning")
-    }
-    
-    if(input$time_to_recovery < 1) {
-      showNotification("The value for time to recovery (days) you entered is above the recommended maximum of 1.", type = "warning")
-    }
-    
-    if(input$R0 > 5) {
-      showNotification("The R0 value you entered is above the recommended maximum of 5.", type = "warning")
-    }
-    
-    if(input$pct_advancing_to_symptoms < 5) {
-      showNotification("The value for percent asymptomatic advancing to symptoms you entered is below the recommended minimum of 5.", type = "warning")
-    }
-    
-    if(input$pct_advancing_to_symptoms > 95) {
-      showNotification("The value for percent asymptomatic advancing to symptoms you entered is above the recommended maximum of 95.", type = "warning")
-    }
-    
-    if(input$symptom_case_fatality_ratio < 0) {
-      showNotification("The value for symptom case fatality risk you entered is below the recommended minimum of 0.", type = "warning")
-    }
-    
-    if(input$symptom_case_fatality_ratio > 0.01) {
-      showNotification("The value for symptom case fatality risk you entered is above the recommended maximum of 0.01.", type = "warning")
-    }
-    
-    if(input$test_sensitivity < 0.5) {
-      showNotification("The value for test sensitivity you entered is below the recommended minimum of 0.5.", type = "warning")
-    }
-    
-    if(input$test_sensitivity > 1) {
-      showNotification("The value for test sensitivity you entered is above the recommended maximum of 1.", type = "warning")
-    }
-    
-    if(input$test_specificity < 0.7) {
-      showNotification("The value for test specificity you entered is below the recommended minimum of 0.7.", type = "warning")
-    }
-    
-    if(input$test_specificity > 1) {
-      showNotification("The value for test specificity you entered is above the recommended maximum of 1.", type = "warning")
-    }
-    
-    if(input$test_cost < 0) {
-      showNotification("The value for test cost you entered is below the recommended minimum of 0.", type = "warning")
-    }
-    
-    if(input$test_cost > 1000) {
-      showNotification("The value for test cost you entered is above the recommended maximum of 1000.", type = "warning")
-    }
-    
-    if(input$confirmatory_test_cost < 0) {
-      showNotification("The value for confirmatory test cost you entered is below the recommended minimum of 0.", type = "warning")
-    }
-    
-    if(input$confirmatory_test_cost > 1000) {
-      showNotification("The value for confirmatory test cost you entered is above the recommended maximum of 1000.", type = "warning")
-    }
+    req(input$initial_susceptible,
+        input$initial_infected,
+        input$R0,
+        input$new_infections_per_shock,
+        input$days_to_incubation,
+        input$time_to_recovery,
+        input$pct_advancing_to_symptoms,
+        input$symptom_case_fatality_ratio,
+        input$test_sensitivity,
+        input$test_specificity,
+        input$test_cost,
+        input$confirmatory_test_cost,
+        cancelOutput = TRUE
+    )
     
     num.exogenous.shocks <- case_when(
       input$exogenous_shocks == "Yes" ~ 1,
@@ -476,14 +452,6 @@ server <- function(input, output) {
         config(displaylogo = FALSE)
     })
   
-  # ## Expected outputs
-  # number_tested <- 12388
-  # number_confirmatory_tests <- 679
-  # average_iu_census <- 42
-  # average_pct_isolated <- 0.44
-  # testing_cost <- 642272
-  # infections <- 359
-  
   ## Value Boxes 
   output$number_tested_box <- renderValueBox({
     valueBox(scales::comma(sum.stat()$number_tested), "Total Tests",
@@ -521,19 +489,6 @@ server <- function(input, output) {
              icon = icon("viruses"),
              color = highlight_color)
   })
-  
-  # output$average_pct_isolated_ibox <- renderInfoBox({
-  #     infoBox(NULL, scales::percent(sum.stat()$average_pct_isolated),
-  #             subtitle = "TP in Isolation (Avg.)",
-  #             color = regular_color)
-  # })
-  # output$approvalBox <- renderInfoBox({
-  #     infoBox(
-  #         "Approval", "80%", icon = icon("thumbs-up", lib = "glyphicon"),
-  #         color = "yellow"
-  #     )
-  # })
-  # 
   
 }
 
