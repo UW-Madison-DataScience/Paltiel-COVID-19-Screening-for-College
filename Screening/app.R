@@ -381,10 +381,10 @@ server <- function(input, output) {
           c(i,
             max(0,mat[i,2]*(1-beta*(mat[i,5]/(mat[i,2]+mat[i,5]+mat[i,4])))+mat[i,3]*mu-mat[i-1,2]*(1-input$test_specificity)/cycles.per.test-superspreader.event[i+1]*input$new_infections_per_shock),
             max(0,mat[i,3]*(1-mu)+mat[i-1,2]*(1-input$test_specificity)/cycles.per.test),
-            max(0,mat[i,4]*(1-theta)+ beta*(mat[i,2]*mat[i,5]/(mat[i,2]+mat[i,5]+mat[i,4]))+superspreader.event[i+1]*input$new_infections_per_shock),
+            max(0,mat[i,4]*(1-theta)+beta*(mat[i,2]*mat[i,5]/(mat[i,2]+mat[i,5]+mat[i,4]))+superspreader.event[i+1]*input$new_infections_per_shock),
             max(0,mat[i,5]*(1-sigma-rho)+mat[i,4]*theta-mat[i-1,5]*input$test_sensitivity/cycles.per.test),
             max(0,mat[i,6]*(1-delta-rho)+(mat[i,5]+mat[i,7])*sigma),
-            max(0,mat[i,7]*(1-sigma-rho)+mat[i-2,5]*input$test_sensitivity/cycles.per.test),
+            max(0,mat[i,7]*(1-sigma-rho)+mat[i-1,5]*input$test_sensitivity/cycles.per.test),
             max(0,mat[i,8]+(mat[i,5]+mat[i,6]+mat[i,7])*rho),
             max(0,delta*mat[i,6]+mat[i,9]))
         )
