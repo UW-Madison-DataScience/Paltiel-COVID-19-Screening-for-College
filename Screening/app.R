@@ -164,12 +164,16 @@ body <- dashboardBody(
         surveillance system to identify true cases; the proportion of people 
         with a health condition (or the proportion of outbreaks) that are 
         identified by a screening test or case definition (or surveillance 
-        system)."),
+        system). See ", 
+        a("CDC DSEPD Principles of Epidemiology in Public Health Practice.",
+          href = "https://www.cdc.gov/csels/dsepd/ss1978/glossary.html")),
       p(strong("Specificity:"),"The ability or a test, case definition, or 
         surveillance system to exclude persons without the health condition of 
         interest; the proportion of persons without a health condition that is 
         correctly identified as such by a screening test, case definition, or 
-        surveillance system."),
+        surveillance system. See ", 
+        a("CDC DSEPD Principles of Epidemiology in Public Health Practice.",
+          href = "https://www.cdc.gov/csels/dsepd/ss1978/glossary.html")),
       p(strong("Test cost:"),"The cost of a test to identify occurrence at the 
         individual level even if there is no reason to suspect infection - e.g., 
         there is no known exposure. This includes, but is not limited to, 
@@ -177,11 +181,15 @@ body <- dashboardBody(
         intent of making decisions based on the test results. Screening tests 
         are intended to identify infected individuals without, or prior to 
         the development of, symptoms who may be contagious so that measures can be 
-        taken to prevent further transmission."),
+        taken to prevent further transmission. See ", 
+        a("CDC SARS-CoV-2 Diagnostic, Screening, and Surveillance Testing.",
+          href = "https://www.cdc.gov/coronavirus/2019-ncov/lab/pooling-procedures.html")),
       p(strong("Confirmatory test cost:"),"The cost of a test to identify occurrence 
         at the individual level and is performed when there is a reason to 
         suspect that an individual may be infected, such as having symptoms or 
-        suspected recent exposure or to determine the resolution of infection."),
+        suspected recent exposure or to determine the resolution of infection. See ", 
+        a("CDC SARS-CoV-2 Diagnostic, Screening, and Surveillance Testing.",
+          href = "https://www.cdc.gov/coronavirus/2019-ncov/lab/pooling-procedures.html")),
       p(strong("Initial susceptible:"),"Noninfected persons."),
       p(strong("Initial infected:"),"Infected, asymptomatic persons."),
       p(strong("R0:"),"The reproduction number is the average number of people that 
@@ -190,7 +198,9 @@ body <- dashboardBody(
         estimate of how transmissible a pathogen is in a population. R0 
         estimates vary across populations and are a function of the duration of 
         contagiousness, the likelihood of infection per contact between a 
-        susceptible person and an infectious person, and the contact rate."),
+        susceptible person and an infectious person, and the contact rate. See ", 
+        a("CDC COVID-19 Pandemic Planning Scenarios.",
+          href = "https://www.cdc.gov/coronavirus/2019-ncov/hcp/planning-scenarios.html")),
       p(strong("Exogenous shocks:"),"Infections transmitted to students by 
         university employees or members of the surrounding community or during 
         superspreader events, such as parties."),
@@ -224,6 +234,17 @@ body <- dashboardBody(
         supportive care from which no further transmissions would occur. The lag 
         reflected both test turnaround delays and the time required to locate 
         and isolate identified cases."),
+      h2("Contacts"),
+      p("We encourage suggestions of new features and improvements to make the 
+        visualizations more helpful. The developers can be contacted below."),
+      tags$ul(tags$li("Srikanth Aravamuthan (",
+                      a("aravamuthan@wisc.edu",
+                        href = "aravamuthan@wisc.edu"),
+                      ")"),
+              tags$li("Sean Kent (",
+                      a("spkent@wisc.edu",
+                        href = "spkent@wisc.edu"),
+                      ")")),
       h2("References"),
       p("Paltiel AD, Zheng A, Walensky RP. Assessment of SARS-CoV-2 Screening 
         Strategies to Permit the Safe Reopening of College Campuses in the 
