@@ -28,7 +28,7 @@ sidebar <- dashboardSidebar(
     id = "sidebar",
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
     menuItem("Source Code", icon = icon("file-code-o"), 
-             href = "https://github.com/aravamu2/Paltiel-COVID-19-Screening-for-College/blob/master/Screening/app.R/"),
+             href = "https://github.com/UW-Madison-DataScience/Paltiel-COVID-19-Screening-for-College/blob/master/Screening/app.R"),
     menuItem("Original Spreadsheet", icon = icon("google-drive"), 
              href = "https://docs.google.com/spreadsheets/d/1otD4h-DpmAmh4dUAM4favTjbsly3t5z-OXOtFSbF1lY/edit#gid=1783644071"),
     menuItem("References", tabName = "references", icon = icon("book"))
