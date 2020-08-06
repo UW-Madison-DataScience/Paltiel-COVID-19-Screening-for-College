@@ -5,8 +5,8 @@ account: spkent
 server: data-viz.it.wisc.edu
 hostUrl: https://data-viz.it.wisc.edu/__api__
 appId: 73
-bundleId: 289
-url: https://data-viz.it.wisc.edu/content/73/
-when: 1596599297.12709
+bundleId: 297
+url: https://data-viz.it.wisc.edu/covid-19-screening/
+when: 1596672817.93726
 asMultiple: FALSE
 asStatic: FALSE
