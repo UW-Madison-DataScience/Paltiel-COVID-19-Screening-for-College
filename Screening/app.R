@@ -19,7 +19,12 @@ regular_color <- "navy"
 # darker red #8b0037
 
 header <- dashboardHeader(
-  title = "Paltiel COVID-19 Screening for College"
+  title = "Paltiel COVID-19 Screening for College",
+  tags$li(a(href = "https://datascience.wisc.edu/covid19/",
+            img(src = "https://hr.wisc.edu/wp-content/uploads/2019/04/uw-crest-red-300x300.png",
+                title = "AFI DSI COVID-19", height = "30px"),
+            style = "padding-top:10px; padding-bottom:10px;"),
+          class = "dropdown")
 )
 
 sidebar <- dashboardSidebar(
