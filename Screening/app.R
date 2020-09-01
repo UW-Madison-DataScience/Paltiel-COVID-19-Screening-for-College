@@ -19,7 +19,12 @@ regular_color <- "navy"
 # darker red #8b0037
 
 header <- dashboardHeader(
-  title = "Paltiel COVID-19 Screening for College"
+  title = "Paltiel COVID-19 Screening for College",
+  tags$li(a(href = "https://datascience.wisc.edu/covid19/",
+            img(src = "https://hr.wisc.edu/wp-content/uploads/2019/04/uw-crest-red-300x300.png",
+                title = "AFI DSI COVID-19", height = "30px"),
+            style = "padding-top:10px; padding-bottom:10px;"),
+          class = "dropdown")
 )
 
 sidebar <- dashboardSidebar(
@@ -297,8 +302,8 @@ server <- function(input, output) {
     showWarningIf(input$R0 > 5, "The value for R0 you entered is above the recommended maximum of 5.")
     showWarningIf(input$new_infections_per_shock < 0, "The value for the number of new infections per shock you entered is below the recommended minimum of 0.")
     showWarningIf(input$new_infections_per_shock > 200, "The value the number of new infections per shock you entered is above the recommended maximum of 200.")
-    showWarningIf(input$days_to_incubation < 1, "The value for days to incubation you entered is above the recommended maximum of 1.")
-    showWarningIf(input$time_to_recovery < 1, "The value for time to recovery (days) you entered is above the recommended maximum of 1.")
+    showWarningIf(input$days_to_incubation < 1, "The value for days to incubation you entered is below the recommended minimum of 1.")
+    showWarningIf(input$time_to_recovery < 1, "The value for time to recovery (days) you entered is below the recommended minimum of 1.")
     showWarningIf(input$pct_advancing_to_symptoms < 5, "The value for percent asymptomatic advancing to symptoms you entered is below the recommended minimum of 5.")
     showWarningIf(input$pct_advancing_to_symptoms > 95, "The value for percent asymptomatic advancing to symptoms you entered is above the recommended maximum of 95.")
     showWarningIf(input$symptom_case_fatality_ratio < 0, "The value for symptom case fatality risk you entered is below the recommended minimum of 0.")
@@ -523,114 +528,3 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 
-## Old code below ---------------------------------------------------------------
-
-# # input style 1 - within larger input box ----------------------------------------------------------------
-# column(width = 4,
-#        # fluidRow(box(width = NULL, background = "black", "Inputs")),
-#        box(width = NULL, solidHeader = FALSE, status = input_element_color, title = "Inputs",
-#            column(width = 6,
-#                   ## Population
-#                   box(title = "Population", width = NULL, #solidHeader = TRUE, status = input_element_color,
-#                       background = "light-blue", 
-#                       collapsible = TRUE, collapsed = TRUE,
-#                       numericInput("initial_susceptible", "Initial susceptible", value = 1001),
-#                       numericInput("initial_infected", "Initial infected", value = 10)
-#                   ), 
-#                   ## Epidemiology
-#                   box(title = "Epidemiology", width = NULL, #solidHeader = TRUE, status = input_element_color,
-#                       background = "light-blue", 
-#                       collapsible = TRUE, collapsed = FALSE,
-#                       numericInput("input$R0", "input$R0", value = 2.5),
-#                       radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
-#                       numericInput("shocks_frequency", "Frequency of exogenous shocks (every x days)", value = 7),
-#                       numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10)
-#                   )
-#            ),
-#            column(width = 6,
-#                   ## Clinical history
-#                   box(title = "Clinical history", width = NULL, #solidHeader = TRUE, status = input_element_color,
-#                       background = "light-blue", 
-#                       collapsible = TRUE, collapsed = TRUE,
-#                       numericInput("days_to_incubation", "Days to Incubation", value = 3),
-#                       numericInput("time_to_recovery", "Time to recovery (days)", value = 14),
-#                       numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 0.3),
-#                       numericInput("symptom_case_fatality_ratio", "Symptom Case Fatality Ratio", value = 0.0005)
-#                   ),
-#                   ## Testing
-#                   box(title = "Testing", width = NULL, #solidHeader = TRUE, status = input_element_color,
-#                       background = "light-blue", 
-#                       collapsible = TRUE, collapsed = FALSE,
-#                       selectizeInput("frequency_of_screening", "Frequency of screening",
-#                                      choices = c("Symptoms Only", 
-#                                                  "Every 4 weeks",
-#                                                  "Every 3 weeks",
-#                                                  "Every 2 weeks",
-#                                                  "Weekly",
-#                                                  "Every 3 days",
-#                                                  "Every 2 days",
-#                                                  "Daily"),
-#                                      selected = "Every 2 weeks"),
-#                       numericInput("test_sensitivity", "Test sensitivity", value = 0.7),
-#                       numericInput("test_specificity", "Test specificity", value = 0.98),
-#                       numericInput("test_cost", "Test cost ($)", value = 25),
-#                       numericInput("isolation_return_time", "Time to return FPs from Isolation (days)", value = 3),
-#                       numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100)
-#                   )
-#            )
-#        ),
-# ),
-
-# 
-# # input style 2 - input header ---------------------------------------------------------------------------
-# column(width = 4,
-#        # fluidRow(box(width = NULL, background = "light-blue", "Inputs")),
-#        box(width = NULL, background = "light-blue", "INPUTS"),
-#        fluidRow(
-#            column(width = 6,
-#                   ## Population
-#                   box(title = "Population", width = NULL, solidHeader = TRUE, status = input_element_color,
-#                       collapsible = TRUE, collapsed = TRUE,
-#                       numericInput("initial_susceptible", "Initial susceptible", value = 1001),
-#                       numericInput("initial_infected", "Initial infected", value = 10)
-#                   ),
-#                   ## Epidemiology
-#                   box(title = "Epidemiology", width = NULL, solidHeader = TRUE, status = input_element_color,
-#                       collapsible = TRUE, collapsed = FALSE,
-#                       numericInput("input$R0", "input$R0", value = 2.5),
-#                       radioButtons("exogenous_shocks", "Exogenous shocks?", choices = c("Yes", "No"), selected = "Yes"),
-#                       numericInput("shocks_frequency", "Frequency of exogenous shocks (every x days)", value = 7),
-#                       numericInput("new_infections_per_shock", "Number of new infections per shock", value = 10)
-#                   )
-#            ),
-#            column(width = 6,
-#                   ## Clinical history
-#                   box(title = "Clinical history", width = NULL, solidHeader = TRUE, status = input_element_color,
-#                       collapsible = TRUE, collapsed = TRUE,
-#                       numericInput("days_to_incubation", "Days to Incubation", value = 3),
-#                       numericInput("time_to_recovery", "Time to recovery (days)", value = 14),
-#                       numericInput("pct_advancing_to_symptoms", "% asymptomatics advancing to symptoms", value = 0.3),
-#                       numericInput("symptom_case_fatality_ratio", "Symptom Case Fatality Ratio", value = 0.0005)
-#                   ),
-#                   ## Testing
-#                   box(title = "Testing", width = NULL, solidHeader = TRUE, status = input_element_color,
-#                       collapsible = TRUE, collapsed = FALSE,
-#                       selectizeInput("frequency_of_screening", "Frequency of screening",
-#                                      choices = c("Symptoms Only", 
-#                                                  "Every 4 weeks",
-#                                                  "Every 3 weeks",
-#                                                  "Every 2 weeks",
-#                                                  "Weekly",
-#                                                  "Every 3 days",
-#                                                  "Every 2 days",
-#                                                  "Daily"),
-#                                      selected = "Every 2 weeks"),
-#                       numericInput("test_sensitivity", "Test sensitivity", value = 0.7),
-#                       numericInput("test_specificity", "Test specificity", value = 0.98),
-#                       numericInput("test_cost", "Test cost ($)", value = 25),
-#                       numericInput("isolation_return_time", "Time to return FPs from Isolation (days)", value = 3),
-#                       numericInput("confirmatory_test_cost", "Confirmatory Test Cost", value = 100)
-#                   )
-#            )  
-#        )
-# ),
